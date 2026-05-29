@@ -294,9 +294,9 @@ export default function App() {
               </Typography>
 
               <Typography>
-  <b>Data:</b>{" "}
-  {new Date(c.service_date).toLocaleDateString("pt-BR")}
-</Typography>
+                <b>Data:</b>{" "}
+                  {new Date(c.service_date).toLocaleDateString("pt-BR")}
+               </Typography>
 
               <Typography>
                 <b>Observações:</b> {c.notes}
