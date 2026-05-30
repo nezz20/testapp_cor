@@ -11,6 +11,8 @@ import {
   Box
 } from "@mui/material";
 
+const API_URL = "https://testapp-cor-v1ft.onrender.com";
+
 export default function App() {
   const [idEdit, setIdEdit] = useState(null);
 
@@ -37,41 +39,41 @@ export default function App() {
   }, []);
 
   async function addClient(e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    const formData = new FormData();
+  const formData = new FormData();
 
-    formData.append("name", name);
-    formData.append("phone", phone);
-    formData.append("colorType", colorType);
-    formData.append("coloration", coloration);
-    formData.append("toner", toner);
-    formData.append("grams", grams);
-    formData.append("oxVolume", oxVolume);
-    formData.append("notes", notes);
-    formData.append("serviceDate", serviceDate);
+  formData.append("name", name);
+  formData.append("phone", phone);
+  formData.append("colorType", colorType);
+  formData.append("coloration", coloration);
+  formData.append("toner", toner);
+  formData.append("grams", grams);
+  formData.append("oxVolume", oxVolume);
+  formData.append("notes", notes);
+  formData.append("serviceDate", serviceDate);
 
-    if (photo) {
-      formData.append("photo", photo);
-    }
-
-    if (idEdit) {
-      await axios.put(
-        `http://localhost:3001/api/clients/${idEdit}`,
-        formData
-      );
-
-      setIdEdit(null);
-    } else {
-      await axios.post(
-        "http://localhost:3001/api/clients",
-        formData
-      );
-    }
-
-    clearForm();
-    loadClients();
+  if (photo) {
+    formData.append("photo", photo);
   }
+
+  if (idEdit) {
+    await axios.put(
+      `${API_URL}/api/clients/${idEdit}`,
+      formData
+    );
+
+    setIdEdit(null);
+  } else {
+    await axios.post(
+      `${API_URL}/api/clients`,
+      formData
+    );
+  }
+
+  clearForm();
+  loadClients();
+}
 
   function clearForm() {
     setName("");
@@ -86,21 +88,21 @@ export default function App() {
     setPhoto(null);
   }
 
-  async function loadClients() {
-    const res = await axios.get(
-      "http://localhost:3001/api/clients"
-    );
+ async function loadClients() {
+  const res = await axios.get(
+    `${API_URL}/api/clients`
+  );
 
-    setClients(res.data);
-  }
+  setClients(res.data);
+}
 
   async function deleteClient(id) {
-    await axios.delete(
-      `http://localhost:3001/api/clients/${id}`
-    );
+  await axios.delete(
+    `${API_URL}/api/clients/${id}`
+  );
 
-    loadClients();
-  }
+  loadClients();
+}
 
   function editClient(c) {
     setIdEdit(c.id);
@@ -250,7 +252,7 @@ export default function App() {
             <CardContent>
               {c.photo && (
                 <img
-                  src={`http://localhost:3001/uploads/${c.photo}`}
+                  src={`${API_URL}/uploads/${c.photo}`}
                   alt=""
                   style={{
                     width: "100%",
