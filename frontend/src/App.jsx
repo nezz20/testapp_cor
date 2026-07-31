@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-
+import Header from "./components/Header";
+import logo from "./assets/logo.png";
+import banner from "./assets/banner.png";
+import background from "./assets/background.jpg";
 import {
   Container,
   TextField,
@@ -8,11 +11,11 @@ import {
   Card,
   CardContent,
   Typography,
-  Box
+  Box,
+  Grid
 } from "@mui/material";
 
-const API_URL = "https://testapp-cor-v1ft.onrender.com";
-
+const API_URL = "https://seu-backend.onrender.com";
 export default function App() {
   const [idEdit, setIdEdit] = useState(null);
 
@@ -119,110 +122,154 @@ export default function App() {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Typography
-        variant="h3"
-        fontWeight="bold"
-        gutterBottom
-        textAlign="center"
-      >
-        Sistema de Cabelo 💇‍♀️
-      </Typography>
-
-      <Card sx={{ borderRadius: 4, mb: 4 }}>
+    <Box
+  sx={{
+    minHeight: "100vh",
+    backgroundImage: `url(${background})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundAttachment: "fixed",
+    py: 4
+  }}
+>
+<Container maxWidth="md">
+      <Header />
+<Card
+  sx={{
+    borderRadius: 6,
+    mb: 4,
+    p: 2,
+    boxShadow: "0 15px 35px rgba(0,0,0,0.15)",
+    background: "rgba(255,255,255,.90)",
+    backdropFilter: "blur(10px)"
+  }}
+>
         <CardContent>
-          <Box
-            component="form"
-            onSubmit={addClient}
-            display="flex"
-            flexDirection="column"
-            gap={2}
-          >
-            <TextField
-              label="Nome"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              fullWidth
-            />
+          <Typography
+  variant="h5"
+  sx={{
+    mb: 3,
+    textAlign: "center",
+    color: "#d63384",
+    fontWeight: "bold"
+  }}
+>
+  Cadastro da Cliente
+</Typography>
+          <Box component="form" onSubmit={addClient}>
+  <Grid container spacing={2}/> 
 
-            <TextField
-              label="Telefone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              fullWidth
-            />
+  
+   <Grid size={{ xs: 12, md: 6 }}>
+  <TextField
+    label="Nome"
+    value={name}
+    onChange={(e) => setName(e.target.value)}
+    fullWidth
+  />
+</Grid>
 
-            <TextField
-              label="Tipo da cor"
-              value={colorType}
-              onChange={(e) => setColorType(e.target.value)}
-              fullWidth
-            />
+      <Grid size={{ xs: 12, md: 6 }}>
+  <TextField
+    label="Telefone"
+    value={phone}
+    onChange={(e) => setPhone(e.target.value)}
+    fullWidth
+  />
+</Grid>
 
-            <TextField
-              label="Coloração"
-              value={coloration}
-              onChange={(e) => setColoration(e.target.value)}
-              fullWidth
-            />
+            <Grid size={{ xs: 12, md: 6 }}>
+  <TextField
+    label="Tipo da cor"
+    value={colorType}
+    onChange={(e) => setColorType(e.target.value)}
+    fullWidth
+  />
+</Grid>
 
-            <TextField
-              label="Tonalizante"
-              value={toner}
-              onChange={(e) => setToner(e.target.value)}
-              fullWidth
-            />
+<Grid size={{ xs: 12, md: 6 }}>
+  <TextField
+    label="Coloração"
+    value={coloration}
+    onChange={(e) => setColoration(e.target.value)}
+    fullWidth
+  />
+</Grid>
 
-            <TextField
-              label="Gramas"
-              value={grams}
-              onChange={(e) => setGrams(e.target.value)}
-              fullWidth
-            />
+            <Grid size={{ xs: 12, md: 6 }}>
+  <TextField
+    label="Tonalizante"
+    value={toner}
+    onChange={(e) => setToner(e.target.value)}
+    fullWidth
+  />
+</Grid>
 
-            <TextField
-              label="Volume OX"
-              value={oxVolume}
-              onChange={(e) => setOxVolume(e.target.value)}
-              fullWidth
-            />
+<Grid size={{ xs: 12, md: 6 }}>
+  <TextField
+    label="Gramas"
+    value={grams}
+    onChange={(e) => setGrams(e.target.value)}
+    fullWidth
+  />
+</Grid>
 
-            <TextField
-              label="Data do atendimento"
-              type="date"
-              value={serviceDate}
-              onChange={(e) =>
-                setServiceDate(e.target.value)
-              }
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-            />
+           <Grid size={{ xs: 12, md: 6 }}>
+  <TextField
+    label="Volume OX"
+    value={oxVolume}
+    onChange={(e) => setOxVolume(e.target.value)}
+    fullWidth
+  />
+</Grid>
 
-            <TextField
-              label="Observações"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              multiline
-              rows={4}
-              fullWidth
-            />
+<Grid size={{ xs: 12, md: 6 }}>
+  <TextField
+    label="Data do atendimento"
+    type="date"
+    value={serviceDate}
+    onChange={(e) => setServiceDate(e.target.value)}
+    InputLabelProps={{ shrink: true }}
+    fullWidth
+  />
+</Grid>
 
-            <input
-              type="file"
-              onChange={(e) =>
-                setPhoto(e.target.files[0])
-              }
-            />
+            <Grid size={12}>
+  <TextField
+    label="Observações"
+    value={notes}
+    onChange={(e) => setNotes(e.target.value)}
+    multiline
+    rows={4}
+    fullWidth
+  />
+</Grid>
 
-            <Button
-              variant="contained"
-              type="submit"
-              size="large"
-            >
-              {idEdit
-                ? "Atualizar Cliente"
-                : "Salvar Cliente"}
-            </Button>
+            <Grid size={12}>
+  <input
+    type="file"
+    onChange={(e) => setPhoto(e.target.files[0])}
+  />
+</Grid>
+
+           <Grid size={12}>
+  <Button
+    variant="contained"
+    type="submit"
+    fullWidth
+    sx={{
+      mt: 2,
+      py: 1.7,
+      borderRadius: 4,
+      fontSize: 18,
+      fontWeight: "bold",
+      background:
+        "linear-gradient(90deg,#d63384,#f783ac)"
+    }}
+  >
+    {idEdit ? "Atualizar Cliente" : "Salvar Cliente"}
+  </Button>
+</Grid>
           </Box>
         </CardContent>
       </Card>
@@ -323,6 +370,21 @@ export default function App() {
             </CardContent>
           </Card>
         ))}
+        
+       <Box
+    sx={{
+        mt:6,
+        mb:2,
+        textAlign:"center",
+        color:"#777"
+    }}
+>
+  
+    © Girl Power • Sistema para Salão de Beleza
+
+</Box> 
     </Container>
+    
+</Box>
   );
 }
