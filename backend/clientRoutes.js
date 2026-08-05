@@ -8,7 +8,6 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "uploads/");
   },
-
   filename: (req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);
   }
@@ -16,41 +15,43 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post("/", upload.single("photo"), (req, res) => {
-  const {
-    name,
-    phone,
-    colorType,
-    coloration,
-    toner,
-    grams,
-    oxVolume,
-    notes,
-    serviceDate
-  } = req.body;
-
-  const photo = req.file ? req.file.filename : null;
-
-  const sql = `
-    INSERT INTO clients
-    (
+// Criar cliente
+router.post("/", upload.single("photo"), async (req, res) => {
+  try {
+    const {
       name,
       phone,
-      color_type,
+      colorType,
       coloration,
       toner,
       grams,
-      ox_volume,
+      oxVolume,
       notes,
-      service_date,
-      photo
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
+      serviceDate
+    } = req.body;
 
-  db.query(
-    sql,
-    [
+    const photo = req.file ? req.file.filename : null;
+
+    const sql = `
+      INSERT INTO clients
+      (
+        name,
+        phone,
+        color_type,
+        coloration,
+        toner,
+        grams,
+        ox_volume,
+        notes,
+        service_date,
+        photo
+      )
+      VALUES
+      ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      RETURNING *;
+    `;
+
+    const result = await db.query(sql, [
       name,
       phone,
       colorType,
@@ -61,108 +62,115 @@ router.post("/", upload.single("photo"), (req, res) => {
       notes,
       serviceDate,
       photo
-    ],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json(err);
-      }
+    ]);
 
-      res.json({
-        message: "Cliente salvo com sucesso"
-      });
-    }
-  );
-});
+    res.json({
+      message: "Cliente salvo com sucesso",
+      client: result.rows[0]
+    });
 
-router.get("/", (req, res) => {
-  db.query("SELECT * FROM clients", (err, result) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json(err);
-    }
-
-    res.json(result);
-  });
-});
-
-router.delete("/:id", (req, res) => {
-  const { id } = req.params;
-
-  db.query(
-    "DELETE FROM clients WHERE id = ?",
-    [id],
-    (err, result) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json(err);
-      }
-
-      res.json({
-        message: "Cliente removido"
-      });
-    }
-  );
-});
-
-router.put("/:id", upload.single("photo"), (req, res) => {
-  const { id } = req.params;
-
-  const {
-    name,
-    phone,
-    colorType,
-    coloration,
-    toner,
-    grams,
-    oxVolume,
-    notes,
-    serviceDate
-  } = req.body;
-
-  let sql = `
-    UPDATE clients SET
-    name = ?,
-    phone = ?,
-    color_type = ?,
-    coloration = ?,
-    toner = ?,
-    grams = ?,
-    ox_volume = ?,
-    notes = ?,
-    service_date = ?
-  `;
-
-  const values = [
-    name,
-    phone,
-    colorType,
-    coloration,
-    toner,
-    grams,
-    oxVolume,
-    notes,
-    serviceDate
-  ];
-
-  if (req.file) {
-    sql += `, photo = ?`;
-    values.push(req.file.filename);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json(err);
   }
+});
 
-  sql += ` WHERE id = ?`;
-  values.push(id);
+// Listar clientes
+router.get("/", async (req, res) => {
+  try {
+    const result = await db.query(
+      "SELECT * FROM clients ORDER BY id DESC"
+    );
 
-  db.query(sql, values, (err, result) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json(err);
+    res.json(result.rows);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json(err);
+  }
+});
+
+// Excluir cliente
+router.delete("/:id", async (req, res) => {
+  try {
+    await db.query(
+      "DELETE FROM clients WHERE id = $1",
+      [req.params.id]
+    );
+
+    res.json({
+      message: "Cliente removido"
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json(err);
+  }
+});
+
+// Atualizar cliente
+router.put("/:id", upload.single("photo"), async (req, res) => {
+
+  try {
+
+    const {
+      name,
+      phone,
+      colorType,
+      coloration,
+      toner,
+      grams,
+      oxVolume,
+      notes,
+      serviceDate
+    } = req.body;
+
+    const id = req.params.id;
+
+    let sql = `
+      UPDATE clients SET
+      name=$1,
+      phone=$2,
+      color_type=$3,
+      coloration=$4,
+      toner=$5,
+      grams=$6,
+      ox_volume=$7,
+      notes=$8,
+      service_date=$9
+    `;
+
+    const values = [
+      name,
+      phone,
+      colorType,
+      coloration,
+      toner,
+      grams,
+      oxVolume,
+      notes,
+      serviceDate
+    ];
+
+    if (req.file) {
+      sql += ", photo=$10 WHERE id=$11";
+      values.push(req.file.filename);
+      values.push(id);
+    } else {
+      sql += " WHERE id=$10";
+      values.push(id);
     }
+
+    await db.query(sql, values);
 
     res.json({
       message: "Cliente atualizado"
     });
-  });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json(err);
+  }
 });
 
 module.exports = router;
