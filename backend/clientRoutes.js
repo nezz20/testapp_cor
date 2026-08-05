@@ -1,19 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
+const { v4: uuidv4 } = require("uuid");
 
 const db = require("./config/db");
+const supabase = require("./config/supabase");
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  }
+const upload = multer({
+  storage: multer.memoryStorage()
 });
-
-const upload = multer({ storage });
 
 // Criar cliente
 router.post("/", upload.single("photo"), async (req, res) => {
@@ -30,8 +25,28 @@ router.post("/", upload.single("photo"), async (req, res) => {
       serviceDate
     } = req.body;
 
-    const photo = req.file ? req.file.filename : null;
+let photo = null;
 
+if (req.file) {
+
+  const fileName = `${uuidv4()}-${req.file.originalname}`;
+
+  const { error } = await supabase.storage
+    .from("photos")
+    .upload(fileName, req.file.buffer, {
+      contentType: req.file.mimetype
+    });
+
+  if (error) {
+    throw error;
+  }
+
+  const { data } = supabase.storage
+    .from("photos")
+    .getPublicUrl(fileName);
+
+  photo = data.publicUrl;
+}
     const sql = `
       INSERT INTO clients
       (
