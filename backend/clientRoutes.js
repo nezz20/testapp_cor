@@ -168,14 +168,34 @@ router.put("/:id", upload.single("photo"), async (req, res) => {
     ];
 
     if (req.file) {
-      sql += ", photo=$10 WHERE id=$11";
-      values.push(req.file.filename);
-      values.push(id);
-    } else {
-      sql += " WHERE id=$10";
-      values.push(id);
-    }
 
+  const fileName = `${uuidv4()}-${req.file.originalname}`;
+
+  const { error } = await supabase.storage
+    .from("photos")
+    .upload(fileName, req.file.buffer, {
+      contentType: req.file.mimetype
+    });
+
+  if (error) {
+    throw error;
+  }
+
+  const { data } = supabase.storage
+    .from("photos")
+    .getPublicUrl(fileName);
+
+  sql += ", photo=$10 WHERE id=$11";
+
+  values.push(data.publicUrl);
+  values.push(id);
+
+} else {
+
+  sql += " WHERE id=$10";
+  values.push(id);
+
+}
     await db.query(sql, values);
 
     res.json({
