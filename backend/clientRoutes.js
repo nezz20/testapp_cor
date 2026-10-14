@@ -14,18 +14,24 @@ const upload = multer({
 router.post("/", upload.single("photo"), async (req, res) => {
   try {
     const {
-      name,
-      phone,
-      colorType,
-      coloration,
-      toner,
-      grams,
-      oxVolume,
-      notes,
-      serviceDate
-    } = req.body;
+  name,
+  phone,
+  colorType,
+  coloration,
+  toner,
+  grams,
+  oxVolume,
+  notes,
+  serviceDate,
+  returnDate
+
+} = req.body;
+
+const serviceDateValue = serviceDate || null;
+const returnDateValue = returnDate || null;
 
 let photo = null;
+
 
 if (req.file) {
 
@@ -48,35 +54,37 @@ if (req.file) {
   photo = data.publicUrl;
 }
     const sql = `
-      INSERT INTO clients
-      (
-        name,
-        phone,
-        color_type,
-        coloration,
-        toner,
-        grams,
-        ox_volume,
-        notes,
-        service_date,
-        photo
-      )
-      VALUES
-      ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-      RETURNING *;
+     INSERT INTO clients
+(
+  name,
+  phone,
+  color_type,
+  coloration,
+  toner,
+  grams,
+  ox_volume,
+  notes,
+  service_date,
+  return_date,
+  photo
+)
+VALUES
+($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+RETURNING *;
     `;
 
     const result = await db.query(sql, [
       name,
-      phone,
-      colorType,
-      coloration,
-      toner,
-      grams,
-      oxVolume,
-      notes,
-      serviceDate,
-      photo
+  phone,
+  colorType,
+  coloration,
+  toner,
+  grams,
+  oxVolume,
+  notes,
+  serviceDateValue,
+  returnDateValue,
+  photo
     ]);
 
     res.json({
@@ -128,44 +136,51 @@ router.put("/:id", upload.single("photo"), async (req, res) => {
 
   try {
 
-    const {
-      name,
-      phone,
-      colorType,
-      coloration,
-      toner,
-      grams,
-      oxVolume,
-      notes,
-      serviceDate
-    } = req.body;
+   const {
+  name,
+  phone,
+  colorType,
+  coloration,
+  toner,
+  grams,
+  oxVolume,
+  notes,
+  serviceDate,
+  returnDate
+} = req.body;
+    const serviceDateValue = serviceDate || null;
+  const returnDateValue = returnDate || null;
+
+  
 
     const id = req.params.id;
 
-    let sql = `
-      UPDATE clients SET
-      name=$1,
-      phone=$2,
-      color_type=$3,
-      coloration=$4,
-      toner=$5,
-      grams=$6,
-      ox_volume=$7,
-      notes=$8,
-      service_date=$9
-    `;
+   let sql = `
+  UPDATE clients SET
+  name=$1,
+  phone=$2,
+  color_type=$3,
+  coloration=$4,
+  toner=$5,
+  grams=$6,
+  ox_volume=$7,
+  notes=$8,
+  service_date=$9,
+  return_date=$10
+`;
 
     const values = [
-      name,
-      phone,
-      colorType,
-      coloration,
-      toner,
-      grams,
-      oxVolume,
-      notes,
-      serviceDate
-    ];
+  name,
+  phone,
+  colorType,
+  coloration,
+  toner,
+  grams,
+  oxVolume,
+  notes,
+  serviceDateValue,
+  returnDateValue,
+];
 
     if (req.file) {
 
@@ -185,14 +200,14 @@ router.put("/:id", upload.single("photo"), async (req, res) => {
     .from("photos")
     .getPublicUrl(fileName);
 
-  sql += ", photo=$10 WHERE id=$11";
+  sql += ", photo=$11 WHERE id=$12";
 
-  values.push(data.publicUrl);
-  values.push(id);
+values.push(data.publicUrl);
+values.push(id);
 
 } else {
 
-  sql += " WHERE id=$10";
+  sql += " WHERE id=$11";
   values.push(id);
 
 }
